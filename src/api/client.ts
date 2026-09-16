@@ -1,6 +1,21 @@
 import axios from 'axios';
 
-const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
+// Environment-aware backend API URL:
+// - In local development (npm run dev): defaults to http://localhost:3000 (from .env.development)
+// - In production build (vite build): defaults to https://jhakaas-msgv1.onrender.com (from .env.production)
+// - Overridden if VITE_API_URL is supplied in the environment
+const DEFAULT_DEV_API = 'http://localhost:3000';
+const DEFAULT_PROD_API = 'https://jhakaas-msgv1.onrender.com';
+
+const getApiBaseUrl = (): string => {
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (typeof envUrl === 'string' && envUrl.trim() !== '') {
+    return envUrl.trim();
+  }
+  return (import.meta as any).env?.PROD ? DEFAULT_PROD_API : DEFAULT_DEV_API;
+};
+
+const API_URL = getApiBaseUrl();
 
 export const apiClient = axios.create({
   baseURL: API_URL,
